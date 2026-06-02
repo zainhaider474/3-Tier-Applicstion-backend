@@ -1,3 +1,4 @@
+//hello
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
@@ -18,7 +19,7 @@ const pool = new Pool({
   database: process.env.DB_NAME || "taskmanager",
 });
 
-// Initialize database table
+// 
 const initDB = async () => {
   try {
     await pool.query(`
