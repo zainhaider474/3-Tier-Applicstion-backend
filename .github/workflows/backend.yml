@@ -14,31 +14,35 @@ jobs:
       contents: read
 
     steps:
-      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Configure AWS credentials via OIDC
+      - name: Debug GitHub context
+        run: |
+          echo "Repository: ${{ github.repository }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Workflow: ${{ github.workflow }}"
+
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: arn:aws:iam::141701955118:role/GitHub-OIDC-Role
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: us-east-1
           audience: GitHub-OIDC-Provider
 
-      # Step 3: Deploy backend on EC2 using SSM
-      - name: Deploy Backend on EC2
+      - name: Build and Deploy Backend on EC2
         run: |
           aws ssm send-command \
             --targets "Key=instanceIds,Values=${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
-            --comment "Deploy backend using PM2" \
-            --parameters commands='[
+            --comment "Build and deploy backend using PM2" \
+            --parameters 'commands=[
               "cd /home/ubuntu/backend",
               "git reset --hard",
               "git pull origin main",
               "npm install",
+              "npm run build --if-present",
               "pm2 describe backend > /dev/null && pm2 restart backend || pm2 start index.js --name backend",
               "pm2 save"
             ]' \
-            --region "${{ secrets.AWS_REGION }}"
+            --region us-east-1
