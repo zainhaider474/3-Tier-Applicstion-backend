@@ -13,6 +13,10 @@ jobs:
       id-token: write
       contents: read
 
+    defaults:
+      run:
+        working-directory: backend
+
     steps:
       # Checkout code
       - name: Checkout code
