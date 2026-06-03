@@ -40,19 +40,17 @@ jobs:
           aws-region: us-east-1
           audience: GitHub-OIDC-Provider
 
-      # CD - Deploy backend on EC2
-      - name: Deploy Backend on EC2
-        run: |
-          aws ssm send-command \
-            --targets "Key=instanceIds,Values=i-0854b377583f20548" \
-            --document-name "AWS-RunShellScript" \
-            --comment "Deploy backend using PM2" \
-            --parameters 'commands=[
-              "cd /home/ubuntu/3-Tier-Applicstion-backend/backend",
-              "git fetch origin main",
-              "git reset --hard origin/main",
-              "npm install --omit=dev",
-              "pm2 describe backend > /dev/null && pm2 restart backend || pm2 start index.js --name backend",
-              "pm2 save"
-            ]' \
-            --region us-east-1
+
+      - name: Deploy Backend
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/3-Tier-Applicstion-backend/backend
+            git fetch origin main
+            git reset --hard origin/main
+            npm install --omit=dev
+            pm2 restart backend
+            pm2 save
