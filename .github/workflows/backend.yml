@@ -14,17 +14,21 @@ jobs:
       contents: read
 
     steps:
+      # Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
+      # Validate dependencies (CI)
       - name: Validate backend dependencies
-        run: npm ci
+        run: npm install
 
+      # Configure AWS credentials via OIDC
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -32,6 +36,7 @@ jobs:
           aws-region: us-east-1
           audience: GitHub-OIDC-Provider
 
+      # Deploy backend on EC2 (CD)
       - name: Deploy Backend on EC2
         run: |
           aws ssm send-command \
@@ -42,7 +47,7 @@ jobs:
               "cd /home/ubuntu/backend",
               "git fetch origin main",
               "git reset --hard origin/main",
-              "npm ci --omit=dev",
+              "npm install --omit=dev",
               "pm2 describe backend > /dev/null && pm2 restart backend || pm2 start index.js --name backend",
               "pm2 save"
             ]' \
