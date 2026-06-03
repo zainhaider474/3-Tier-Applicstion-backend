@@ -41,7 +41,7 @@ const initDB = async () => {
 
 // Health check
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", message: "Backend updated through GitHub Actions CI/CD " });
+  res.json({ status: "ok", message: "Backend Updated Finally" });
 });
 
 // GET all tasks
